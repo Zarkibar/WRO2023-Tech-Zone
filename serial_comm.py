@@ -1,16 +1,17 @@
 import serial
 from time import sleep
 
-SERIAL_PORT = '/dev/ttyUSB0'
-SERIAL_BAUDRATE = 9600
 
-
-def setup(delay):
+def setup(serial_port, serial_baudrate, delay):
     global ser
-    ser = serial.Serial(SERIAL_PORT, SERIAL_BAUDRATE, timeout=1.0)
+    ser = serial.Serial(serial_port, serial_baudrate, timeout=1.0)
     sleep(delay)
     ser.reset_input_buffer()
     return ser
+
+
+def setDTR(state):
+    ser.setDTR(state)
 
 
 def flush():
@@ -25,7 +26,7 @@ def flush_output():
     ser.flushOutput()
 
 
-def get_data():
+def recv_data():
     response = ''
     if ser.in_waiting > 0:
         response = ser.readline().decode('utf-8').rstrip()

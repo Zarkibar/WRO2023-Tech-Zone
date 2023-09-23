@@ -2,7 +2,7 @@ import serial
 from time import sleep
 
 SERIAL_PORT = '/dev/ttyUSB0'
-SERIAL_BAUDRATE = 115200
+SERIAL_BAUDRATE = 9600
 
 
 def setup(delay):

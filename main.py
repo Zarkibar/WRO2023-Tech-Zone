@@ -9,9 +9,10 @@ from time import sleep
 
 
 SERIAL_PORT = '/dev/ttyUSB0'
-BAUDRATE = 9600
+BAUDRATE = 19200
 
-MAX_WALL_DISTANCE = 20
+MAX_WALL_DISTANCE = 90
+TOLERANCE = 10
 
 
 def camera():
@@ -22,6 +23,7 @@ def camera():
         while True:
             sleep(0.001)
             ret, frame = cap.read()
+            frame = cv2.resize(frame, (400, 300))
             frame = image_processing.line_detection(frame, 'yellow')
 
             cv2.imshow('frame', frame)
@@ -37,9 +39,11 @@ def camera():
 def serial_communication():
     serial_comm.setup(SERIAL_PORT, BAUDRATE, 3)
     serial_comm.setDTR(True)
+    global servo_state
     global distance_left, distance_right
     distance_left = 0
     distance_right = 0
+    servo_state = 0
 
     serial_comm.send_data("F")
 
@@ -54,12 +58,25 @@ def serial_communication():
             distance_right = int(recved_data[2:])
 
         # Movement
-        if distance_left < MAX_WALL_DISTANCE and distance_right < MAX_WALL_DISTANCE:
-            serial_comm.send_data("Ss")
-        elif distance_left > MAX_WALL_DISTANCE:
-            serial_comm.send_data("R")
-        elif distance_right > MAX_WALL_DISTANCE:
+        # if distance_left < MAX_WALL_DISTANCE and distance_right < MAX_WALL_DISTANCE and servo_state != 0:
+        #     serial_comm.send_data("Ss")
+        #     servo_state = 0
+        # elif distance_left > MAX_WALL_DISTANCE and servo_state != 1:
+        #     serial_comm.send_data("R")
+        #     servo_state = 1
+        # elif distance_right > MAX_WALL_DISTANCE and servo_state != -1:
+        #     serial_comm.send_data("L")
+        #     servo_state = -1
+
+        if (distance_left - distance_right) > TOLERANCE and servo_state != -1:
             serial_comm.send_data("L")
+            servo_state = -1
+        elif (distance_right - distance_left) > TOLERANCE and servo_state != 1:
+            serial_comm.send_data("R")
+            servo_state = 1
+        elif (distance_left - distance_right) < TOLERANCE and (distance_right - distance_left) < TOLERANCE and servo_state != 0:
+            serial_comm.send_data("Ss")
+            servo_state = 0
 
         print("dl: " + str(distance_left) + "\ndr: " + str(distance_right))
 

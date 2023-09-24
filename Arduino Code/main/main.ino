@@ -5,21 +5,22 @@ Servo servo;
 #define motor_in1 12
 #define motor_in2 11
 #define motor_speed_pin 10
-int motor_speed = 100;
+int motor_speed = 255;
 
-#define TRIGGER_PIN_LEFT 5
-#define ECHO_PIN_LEFT 4
-#define TRIGGER_PIN_RIGHT 9
-#define ECHO_PIN_RIGHT 8
+#define TRIGGER_PIN_LEFT 9
+#define ECHO_PIN_LEFT 8
+#define TRIGGER_PIN_RIGHT 5
+#define ECHO_PIN_RIGHT 4
 
 int duration_left;
 int distance_left;
 int duration_right;
 int distance_right;
 
-int BAUDRATE = 9600;
-int servo_min_pos = 58;
-int servo_max_pos = 118;
+int BAUDRATE = 19200;
+int SERVO_MIN_POS = 58;
+int SERVO_MAX_POS = 108;
+int SERVO_DEFAULT_POS = 78
 
 void setup(){
   Serial.begin(BAUDRATE);
@@ -33,7 +34,7 @@ void setup(){
   pinMode(motor_in1,OUTPUT);
   pinMode(motor_in2,OUTPUT);
   pinMode(motor_speed_pin,OUTPUT);
-  analogWrite(motor_speed_pin, motor_speed)
+  analogWrite(motor_speed_pin, motor_speed);
   servo.write(78);
   delay(1000);
   while (!Serial) {}
@@ -59,13 +60,13 @@ void loop()
     digitalWrite(motor_in2, LOW);
   }
    else if (message == "L"){
-    servo.write(48);
+    servo.write(SERVO_MIN_POS);
   }
    else if (message == "R"){
-    servo.write(108);
+    servo.write(SERVO_MAX_POS);
   }
   else if (message == "Ss"){
-    servo.write(78);
+    servo.write(SERVO_DEFAULT_POS);
   }
  }
 }
@@ -95,7 +96,7 @@ void CalculateDistance()
   Serial.print("Sr");
   Serial.println(distance_right);
 
-  delay(5);
+  delay(25);
 
 
 }

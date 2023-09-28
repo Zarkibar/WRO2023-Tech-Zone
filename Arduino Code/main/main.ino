@@ -36,7 +36,7 @@ void setup(){
   pinMode(motor_speed_pin,OUTPUT);
   analogWrite(motor_speed_pin, motor_speed);
   servo.write(78);
-  delay(1000);
+  delay(1000); 
   while (!Serial) {}
 }
 

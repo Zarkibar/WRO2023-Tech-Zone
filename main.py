@@ -3,10 +3,10 @@ import image_processing
 import utils
 import threading
 import cv2
-import numpy as np
-from PIL import Image
 from time import sleep
+from gpiozero import Button
 
+on_button = Button(12)
 
 SERIAL_PORT = '/dev/ttyUSB0'
 BAUDRATE = 19200
@@ -17,7 +17,7 @@ TOLERANCE = 10
 
 def camera():
     cap = cv2.VideoCapture(0)
-    sleep(3)
+    sleep(2)
 
     try:
         while True:
@@ -26,10 +26,12 @@ def camera():
             frame = cv2.resize(frame, (400, 300))
             frame = image_processing.line_detection(frame, 'yellow')
 
-            cv2.imshow('frame', frame)
+            lower_limit, upper_limit = utils.get_limits('green')
+            mask = cv2.inRange(frame, lower_limit, upper_limit)
 
-            if cv2.waitKey(1) == ord('q'):
-                break
+            cv2.imshow('frame', frame)
+            cv2.imshow('mask', mask)
+
     except KeyboardInterrupt:
         print("Keyboard Interrupted")
         cap.release()
@@ -58,15 +60,6 @@ def serial_communication():
             distance_right = int(recved_data[2:])
 
         # Movement
-        # if distance_left < MAX_WALL_DISTANCE and distance_right < MAX_WALL_DISTANCE and servo_state != 0:
-        #     serial_comm.send_data("Ss")
-        #     servo_state = 0
-        # elif distance_left > MAX_WALL_DISTANCE and servo_state != 1:
-        #     serial_comm.send_data("R")
-        #     servo_state = 1
-        # elif distance_right > MAX_WALL_DISTANCE and servo_state != -1:
-        #     serial_comm.send_data("L")
-        #     servo_state = -1
 
         if (distance_left - distance_right) > TOLERANCE and servo_state != -1:
             serial_comm.send_data("L")
@@ -82,6 +75,8 @@ def serial_communication():
 
 
 if __name__ == "__main__":
+    on_button.wait_for_active()
+
     serial_thread = threading.Thread(target=serial_communication)
     camera_thread = threading.Thread(target=camera)
     serial_thread.start()

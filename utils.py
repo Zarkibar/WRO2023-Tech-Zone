@@ -1,26 +1,27 @@
 from time import sleep, time
+
+import cv2
 import numpy as np
 
 
 def get_limits(color):
     if color == 'red':
-        lower_limit = [0, 200, 200]
-        upper_limit = [6, 255, 255]
+        bgr_color = np.uint8([[[0, 0, 255]]])
     elif color == 'green':
-        lower_limit = [40, 100, 100]
-        upper_limit = [80, 255, 255]
+        bgr_color = np.uint8([[[0, 255, 0]]])
     elif color == 'blue':
-        lower_limit = [81, 100, 100]
-        upper_limit = [130, 255, 255]
+        bgr_color = np.uint8([[[255, 0, 0]]])
     elif color == 'yellow':
-        lower_limit = [18, 94, 140]
-        upper_limit = [48, 255, 255]
+        bgr_color = np.uint8([[[255, 255, 0]]])
     elif color == 'black':
-        lower_limit = [30, 37, 0]
-        upper_limit = [100, 255, 78]
+        bgr_color = np.uint8([[[0, 0, 0]]])
+    else:
+        print("COLOR " + color + " NOT RECOGNIZABLE")
+        bgr_color = np.uint8([[[0, 0, 0]]])
 
-    lower_limit = np.array(lower_limit, dtype=np.uint8)
-    upper_limit = np.array(upper_limit, dtype=np.uint8)
+    hsv_color = cv2.cvtColor(bgr_color, cv2.COLOR_BGR2HSV)
+    lower_limit = np.uint8([[[(hsv_color[0, 0, 0] - 10), 100, 100]]])
+    upper_limit = np.uint8([[[(hsv_color[0, 0, 0] + 10), 255, 255]]])
 
     return lower_limit, upper_limit
 
